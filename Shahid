@@ -1,0 +1,338 @@
+!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Dodge Game</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #87ceeb;
+  }
+  h1 {
+    margin-top: 10px;
+  }
+  #scoreBoard {
+    font-size: 20px;
+    margin-top: 5px;
+  }
+  #gameArea {
+    position: relative;
+    width: 300px;
+    height: 500px;
+    margin: 20px auto;
+    background: #444;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 2px solid #333;
+  }
+  #playerCar {
+    position: absolute;
+    width: 50px;
+    height: 100px;
+    bottom: 10px;
+    left: 125px;
+    background: red;
+    border-radius: 5px;
+  }
+  .obstacle {
+    position: absolute;
+    width: 50px;
+    height: 100px;
+    background: black;
+    top: -120px;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Car Dodge Game</h1>
+<div id="scoreBoard">Score: 0</div>
+<div id="gameArea">
+  <div id="playerCar"></div>
+</div>
+
+<script>
+const gameArea = document.getElementById("gameArea");
+const player = document.getElementById("playerCar");
+let score = 0;
+let gameSpeed = 3;
+let obstacles = [];
+let lanes = [0, 50, 100, 150, 200, 250]; // 6 lanes
+
+// Player movement
+let playerX = 125;
+document.addEventListener("keydown", (e) => {
+    if(e.key === "ArrowLeft") {
+        playerX -= 50;
+        if(playerX < 0) playerX = 0;
+    }
+    if(e.key === "ArrowRight") {
+        playerX += 50;
+        if(playerX > 250) playerX = 250;
+    }
+    player.style.left = playerX + "px";
+});
+
+// Mobile swipe controls
+let touchStartX = 0;
+document.addEventListener("touchstart", (e) => {
+    touchStartX = e.touches[0].clientX;
+});
+document.addEventListener("touchend", (e) => {
+    let touchEndX = e.changedTouches[0].clientX;
+    if(touchEndX < touchStartX) { // swipe left
+        playerX -= 50;
+        if(playerX < 0) playerX = 0;
+    } else { // swipe right
+        playerX += 50;
+        if(playerX > 250) playerX = 250;
+    }
+    player.style.left = playerX + "px";
+});
+
+// Create obstacle
+function createObstacle() {
+    const obs = document.createElement("div");
+    obs.classList.add("obstacle");
+    obs.style.left = lanes[Math.floor(Math.random() * lanes.length)] + "px";
+    obs.style.top = "-120px";
+    gameArea.appendChild(obs);
+    obstacles.push(obs);
+}
+
+// Move obstacles
+function moveObstacles() {
+    obstacles.forEach((obs, index) => {
+        let obsY = parseInt(obs.style.top);
+        obsY += gameSpeed;
+        obs.style.top = obsY + "px";
+
+        // Collision detection
+        if(obsY + 100 > 390 && obsY < 500 && parseInt(obs.style.left) === playerX) {
+            alert("Game Over! Score: " + score);
+            location.reload();
+        }
+
+        // Remove obstacle when out of screen
+        if(obsY > 500) {
+            gameArea.removeChild(obs);
+            obstacles.splice(index, 1);
+            score++;
+            document.getElementById("scoreBoard").innerText = "Score: " + score;
+
+            // Increase speed every 5 points
+            if(score % 5 === 0) gameSpeed += 0.5;
+        }
+    });
+}
+
+// Game loop
+setInterval(moveObstacles, 20);
+setInterval(createObstacle, 1500);
+
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upgraded Car Dodge Game</title>
+<style>
+body {
+    margin:0; padding:0; font-family: Arial, sans-serif; text-align:center;
+    background:#87ceeb;
+}
+h1 {margin-top:10px;}
+#scoreBoard {font-size:20px; margin-top:5px;}
+#gameArea {
+    position:relative; width:300px; height:500px; margin:20px auto;
+    background:#444; overflow:hidden; border-radius:10px; border:2px solid #333;
+}
+#playerCar {
+    position:absolute; width:50px; height:100px; bottom:10px; left:125px;
+    background:red; border-radius:5px; z-index:2;
+}
+.obstacle {
+    position:absolute; width:50px; height:100px; top:-120px; border-radius:5px;
+}
+.coin {
+    position:absolute; width:30px; height:30px; top:-50px; border-radius:50%;
+    background:yellow; z-index:2;
+}
+.roadLine {
+    position:absolute; width:10px; height:50px; background:white; left:145px;
+    top:-60px;
+}
+</style>
+</head>
+<body>
+
+<h1>Car Dodge Game</h1>
+<div id="scoreBoard">Score: 0 | Coins: 0</div>
+<div id="gameArea">
+    <div id="playerCar"></div>
+</div>
+
+<script>
+const gameArea = document.getElementById("gameArea");
+const player = document.getElementById("playerCar");
+let score = 0;
+let coins = 0;
+let gameSpeed = 3;
+let obstacles = [];
+let coinsArr = [];
+let lanes = [0,50,100,150,200,250]; // lanes
+
+// Player movement
+let playerX = 125;
+document.addEventListener("keydown", e=>{
+    if(e.key==="ArrowLeft"){playerX-=50;if(playerX<0)playerX=0;}
+    if(e.key==="ArrowRight"){playerX+=50;if(playerX>250)playerX=250;}
+    player.style.left=playerX+"px";
+});
+// Mobile swipe
+let touchStartX=0;
+document.addEventListener("touchstart", e=>{touchStartX=e.touches[0].clientX;});
+document.addEventListener("touchend", e=>{
+    let touchEndX=e.changedTouches[0].clientX;
+    if(touchEndX<touchStartX){playerX-=50;if(playerX<0)playerX=0;}
+    else{playerX+=50;if(playerX>250)playerX=250;}
+    player.style.left=playerX+"px";
+});
+
+// Road lines animation
+let roadLines = [];
+for(let i=0;i<6;i++){
+    const line=document.createElement("div");
+    line.classList.add("roadLine");
+    line.style.top=(i*100)+"px";
+    gameArea.appendChild(line);
+    roadLines.push(line);
+}
+function moveRoadLines(){
+    roadLines.forEach(line=>{
+        let top=parseInt(line.style.top);
+        top+=gameSpeed;
+        if(top>500) top=-60;
+        line.style.top=top+"px";
+    });
+}
+
+// Create obstacle
+function createObstacle(){
+    const obs=document.createElement("div");
+    obs.classList.add("obstacle");
+    obs.style.left=lanes[Math.floor(Math.random()*lanes.length)]+"px";
+    obs.style.background="black";
+    gameArea.appendChild(obs);
+    obstacles.push(obs);
+}
+// Create coin
+function createCoin(){
+    const coin=document.createElement("div");
+    coin.classList.add("coin");
+    coin.style.left=lanes[Math.floor(Math.random()*lanes.length)]+"px";
+    gameArea.appendChild(coin);
+    coinsArr.push(coin);
+}
+
+// Move obstacles
+function moveObstacles(){
+    obstacles.forEach((obs,index)=>{
+        let top=parseInt(obs.style.top);
+        top+=gameSpeed;
+        obs.style.top=top+"px";
+        // collision
+        if(top+100>390 && top<500 && parseInt(obs.style.left)===playerX){
+            alert("Game Over! Score: "+score+" | Coins: "+coins);
+            location.reload();
+        }
+        if(top>500){gameArea.removeChild(obs); obstacles.splice(index,1); score++; document.getElementById("scoreBoard").innerText="Score: "+score+" | Coins: "+coins;
+        if(score%5===0) gameSpeed+=0.5;}
+    });
+}
+
+// Move coins
+function moveCoins(){
+    coinsArr.forEach((coin,index)=>{
+        let top=parseInt(coin.style.top);
+        top+=gameSpeed;
+        coin.style.top=top+"px";
+        if(top+30>390 && top<500 && parseInt(coin.style.left)===playerX){
+            coins++; gameArea.removeChild(coin); coinsArr.splice(index,1); document.getElementById("scoreBoard").innerText="Score: "+score+" | Coins: "+coins;
+        }
+        if(top>500){gameArea.removeChild(coin); coinsArr.splice(index,1);}
+    });
+}
+
+// Game loop
+setInterval(()=>{moveObstacles(); moveCoins(); moveRoadLines();},20);
+setInterval(createObstacle,1500);
+setInterval(createCoin,3000);
+
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Car Dodge Game</title>
+<style>
+body {margin:0; padding:0; font-family:Arial,sans-serif; text-align:center; background:#87ceeb;}
+h1 {margin-top:10px;}
+#scoreBoard {font-size:20px; margin-top:5px;}
+#gameArea {position:relative; width:300px; height:500px; margin:20px auto; background:#444; overflow:hidden; border-radius:10px; border:2px solid #333;}
+#playerCar {position:absolute; width:50px; height:100px; bottom:10px; left:125px; background:red; border-radius:5px; z-index:2;}
+.obstacle {position:absolute; width:50px; height:100px; top:-120px; border-radius:5px;}
+.coin {position:absolute; width:30px; height:30px; top:-50px; border-radius:50%; background:yellow; z-index:2;}
+.powerup {position:absolute; width:30px; height:30px; top:-50px; border-radius:50%; background:lime; z-index:2;}
+.roadLine {position:absolute; width:10px; height:50px; background:white; left:145px; top:-60px;}
+</style>
+</head>
+<body>
+
+<h1>Pro Car Dodge Game</h1>
+<div id="scoreBoard">Score: 0 | Coins: 0 | Level: 1</div>
+<div id="gameArea">
+    <div id="playerCar"></div>
+</div>
+
+<!-- Sounds -->
+<audio id="coinSound" src="https://www.soundjay.com/button/sounds/button-3.mp3"></audio>
+<audio id="crashSound" src="https://www.soundjay.com/explosion/sounds/explosion-01.mp3"></audio>
+<audio id="levelUpSound" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
+
+<script>
+const gameArea=document.getElementById("gameArea");
+const player=document.getElementById("playerCar");
+const coinSound=document.getElementById("coinSound");
+const crashSound=document.getElementById("crashSound");
+const levelUpSound=document.getElementById("levelUpSound");
+
+let score=0, coins=0, gameSpeed=3, level=1;
+let obstacles=[], coinsArr=[], powerUps=[];
+let lanes=[0,50,100,150,200,250];
+let playerX=125;
+
+// Player move
+document.addEventListener("keydown",e=>{
+    if(e.key==="ArrowLeft"){playerX-=50;if(playerX<0)playerX=0;}
+    if(e.key==="ArrowRight"){playerX+=50;if(playerX>250)playerX=250;}
+    player.style.left=playerX+"px";
+});
+
+// Mobile swipe
+let touchStartX=0;
+document.addEventListener("touchstart", e=>{touchStartX=e.touches[0].clientX;});
+document.addEventListener("touchend", e=>{
+    let touchEndX=e.changedTouches[0].clientX;
+    if(touchEndX<touchStartX){playerX-=50;if(playerX<0)playerX=0;}
+    else{playerX+=50;if(playerX>250)playerX=250;}
+    player.style.l
